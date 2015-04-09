@@ -2,6 +2,9 @@ import os
 import numpy as np
 from pandas.io.parsers import read_csv 
 from sklearn.utils import shuffle
+from lasagne import layers
+from lasagne.updates import nesterov_momentum
+from nolearn.lasagne import NeuralNet
 
 FTRAIN = 'training.csv'
 FTEST = 'test.csv'
@@ -31,8 +34,28 @@ def load(test = False, cols = None):
 
     return X, y
 
-X, y = load()
+net1 = NeuralNet(
+        layers = [
+            ('input', layers.InputLayer),
+            ('hidden', layers.DenseLayer),
+            ('output', layers.DenseLayer),
+            ],
+        input_shape = (None, 9216),
+        hidden_num_units = 100,
+        output_nonlinearity = None,
+        output_num_units = 30,
 
+        update = nesterov_momentum,
+        update_learning_rate = 0.01,
+        update_momentum = 0.9,
+
+        regression = True,
+        max_epochs = 400,
+        verbose = 1,
+        )
+
+X, y = load()
 print ("X.shape == {}, X.min == {:.3f}, X.max == {:.3f}").format(X.shape, X.min(), X.max())
 print ("y.shape == {}, y.min == {:.3f}, y.max == {:.3f}").format(y.shape, y.min(), y.max())
+net1.fit(X, y)
 
