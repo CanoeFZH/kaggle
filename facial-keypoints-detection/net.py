@@ -6,32 +6,12 @@ from lasagne.updates import nesterov_momentum
 from nolearn.lasagne import NeuralNet
 from nolearn.lasagne import BatchIterator
 from sklearn.utils import shuffle
+import theano
 import cPickle as pickle
 
 FTRAIN = 'training.csv'
 FTEST = 'test.csv'
 
-class FlipBatchIterator(BatchIterator):
-
-    flip_indices = [
-            (0, 2), (1, 3), (4, 8), (5, 9), (6, 10), (7, 11), (12, 16),
-            (13, 17), (14, 18), (15, 19), (22, 24), (23, 25),
-            ]
-
-    def transform(self, Xb, yb):
-        Xb, yb = super(FlipBatchIterator, self).transform(Xb, yb)
-
-        bs = Xb.shape[0]
-        indices = np.random.choice(bs, bs / 2, replace = False)
-        Xb[indices] = Xb[indices, :, :, ::-1]
-
-        if yb is not None:
-            yb[indices, ::2] = yb[indices, ::2] * -1
-            for a, b in self.flip_indices:
-                yb[indices, a], yb[indices, b] = (yb[indices, b], yb[indices, a])
-
-        return Xb, yb
-        
 def load(test = False, cols = None):
     fname = FTEST if test else FTRAIN
     df = read_csv(os.path.expanduser(fname)) 
@@ -62,7 +42,45 @@ def load2d(test = False, cols = None):
     X = X.reshape(-1, 1, 96, 96)
     return X, y
 
-net3 = NeuralNet(
+def float32(k):
+    return np.cast['float32'](k)
+
+class FlipBatchIterator(BatchIterator):
+
+    flip_indices = [
+            (0, 2), (1, 3), (4, 8), (5, 9), (6, 10), (7, 11), (12, 16),
+            (13, 17), (14, 18), (15, 19), (22, 24), (23, 25),
+            ]
+
+    def transform(self, Xb, yb):
+        Xb, yb = super(FlipBatchIterator, self).transform(Xb, yb)
+
+        bs = Xb.shape[0]
+        indices = np.random.choice(bs, bs / 2, replace = False)
+        Xb[indices] = Xb[indices, :, :, ::-1]
+
+        if yb is not None:
+            yb[indices, ::2] = yb[indices, ::2] * -1
+            for a, b in self.flip_indices:
+                yb[indices, a], yb[indices, b] = (yb[indices, b], yb[indices, a])
+
+        return Xb, yb
+
+class AdjustVariable(object):
+    def __init__(self, name, start = 0.03, stop = 0.001):
+        self.name = name
+        self.start, self.stop = start, stop
+        self.ls = None
+
+    def __call__(self, nn, train_history):
+        if self.ls is None:
+            self.ls = np.linspace(self.start, self.stop, nn.max_epochs)
+
+        epoch = train_history[-1]['epoch']
+        new_value = float32(self.ls[epoch - 1])
+        getattr(nn, self.name).set_value(new_value)
+
+net4 = NeuralNet(
         layers = [
             ('input', layers.InputLayer),
             ('conv1', layers.Conv2DLayer),
@@ -82,18 +100,23 @@ net3 = NeuralNet(
         hidden4_num_units = 500, hidden5_num_units = 500,
         output_num_units = 30, output_nonlinearity = None,
 
-        update_learning_rate = 0.01,
-        update_momentum = 0.9,
+        update_learning_rate = theano.shared(float32(0.03)),
+        update_momentum = theano.shared(float32(0.9)),
 
         regression = True,
-        batch_iterator_train = FlipBatchIterator(batch_size = 12),
+        batch_iterator_train = FlipBatchIterator(batch_size = 128),
+
+        on_epoch_finished = [
+            AdjustVariable('update_learning_rate', start = 0.03, stop = 0.0001),
+            AdjustVariable('update_momentum', start = 0.9, stop = 0.999),
+            ],
         max_epochs = 3000,
         verbose = 1,
         )
 
 X, y = load2d()
-net3.fit(X, y)
+net4.fit(X, y)
 
-with open('net3.pickle', 'wb') as f:
-    pickle.dump(net3, f, -1)
+with open('net4.pickle', 'wb') as f:
+    pickle.dump(net4, f, -1)
 
