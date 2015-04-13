@@ -6,8 +6,12 @@ from lasagne.updates import nesterov_momentum
 from nolearn.lasagne import NeuralNet
 from nolearn.lasagne import BatchIterator
 from sklearn.utils import shuffle
+from sklearn.metrics import mean_squared_error
 import theano
 import cPickle as pickle
+import sys
+
+sys.setrecursionlimit(10000)
 
 FTRAIN = 'training.csv'
 FTEST = 'test.csv'
@@ -80,24 +84,34 @@ class AdjustVariable(object):
         new_value = float32(self.ls[epoch - 1])
         getattr(nn, self.name).set_value(new_value)
 
-net4 = NeuralNet(
+net5 = NeuralNet(
         layers = [
             ('input', layers.InputLayer),
+
             ('conv1', layers.Conv2DLayer),
             ('pool1', layers.MaxPool2DLayer),
+            ('dropout1', layers.DropoutLayer),
+
             ('conv2', layers.Conv2DLayer),
             ('pool2', layers.MaxPool2DLayer), 
+            ('dropout2', layers.DropoutLayer),
+
             ('conv3', layers.Conv2DLayer),
             ('pool3', layers.MaxPool2DLayer), 
+            ('dropout3', layers.DropoutLayer),
+
             ('hidden4', layers.DenseLayer),
+            ('dropout4', layers.DropoutLayer),
+
             ('hidden5', layers.DenseLayer),
             ('output', layers.DenseLayer),
             ],
         input_shape = (None, 1, 96, 96),
-        conv1_num_filters = 32, conv1_filter_size = (3, 3), pool1_ds = (2, 2),
-        conv2_num_filters = 32, conv2_filter_size = (3, 3), pool2_ds = (2, 2),
-        conv3_num_filters = 32, conv3_filter_size = (3, 3), pool3_ds = (2, 2),
-        hidden4_num_units = 500, hidden5_num_units = 500,
+        conv1_num_filters = 32, conv1_filter_size = (3, 3), pool1_ds = (2, 2), dropout1_p = 0.1,
+        conv2_num_filters = 32, conv2_filter_size = (3, 3), pool2_ds = (2, 2), dropout2_p = 0.2,
+        conv3_num_filters = 32, conv3_filter_size = (3, 3), pool3_ds = (2, 2), dropout3_p = 0.3,
+        hidden4_num_units = 1000, dropout4_p = 0.5,
+        hidden5_num_units = 1000,
         output_num_units = 30, output_nonlinearity = None,
 
         update_learning_rate = theano.shared(float32(0.03)),
@@ -110,13 +124,15 @@ net4 = NeuralNet(
             AdjustVariable('update_learning_rate', start = 0.03, stop = 0.0001),
             AdjustVariable('update_momentum', start = 0.9, stop = 0.999),
             ],
-        max_epochs = 3000,
+        max_epochs = 10000,
         verbose = 1,
         )
 
 X, y = load2d()
-net4.fit(X, y)
+net5.fit(X, y)
 
-with open('net4.pickle', 'wb') as f:
-    pickle.dump(net4, f, -1)
+with open('net5.pickle', 'wb') as f:
+    pickle.dump(net5, f, -1)
+
+print mean_squared_error(net5.predict(X), y)
 
