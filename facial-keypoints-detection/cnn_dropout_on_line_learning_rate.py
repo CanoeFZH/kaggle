@@ -41,7 +41,7 @@ def load(test = False, cols = None):
 
     return X, y
 
-def load2d(test = False, cols = None):
+def load_2d(test = False, cols = None):
     X, y = load(test)
     X = X.reshape(-1, 1, 96, 96)
     return X, y
@@ -84,55 +84,60 @@ class AdjustVariable(object):
         new_value = float32(self.ls[epoch - 1])
         getattr(nn, self.name).set_value(new_value)
 
-net5 = NeuralNet(
-        layers = [
-            ('input', layers.InputLayer),
 
-            ('conv1', layers.Conv2DLayer),
-            ('pool1', layers.MaxPool2DLayer),
-            ('dropout1', layers.DropoutLayer),
+def get_net():
+    net = NeuralNet(
+            layers = [
+                ('input', layers.InputLayer),
 
-            ('conv2', layers.Conv2DLayer),
-            ('pool2', layers.MaxPool2DLayer), 
-            ('dropout2', layers.DropoutLayer),
+                ('conv1', layers.Conv2DLayer),
+                ('pool1', layers.MaxPool2DLayer),
+                ('dropout1', layers.DropoutLayer),
 
-            ('conv3', layers.Conv2DLayer),
-            ('pool3', layers.MaxPool2DLayer), 
-            ('dropout3', layers.DropoutLayer),
+                ('conv2', layers.Conv2DLayer),
+                ('pool2', layers.MaxPool2DLayer), 
+                ('dropout2', layers.DropoutLayer),
 
-            ('hidden4', layers.DenseLayer),
-            ('dropout4', layers.DropoutLayer),
+                ('conv3', layers.Conv2DLayer),
+                ('pool3', layers.MaxPool2DLayer), 
+                ('dropout3', layers.DropoutLayer),
 
-            ('hidden5', layers.DenseLayer),
-            ('output', layers.DenseLayer),
-            ],
-        input_shape = (None, 1, 96, 96),
-        conv1_num_filters = 32, conv1_filter_size = (3, 3), pool1_ds = (2, 2), dropout1_p = 0.1,
-        conv2_num_filters = 32, conv2_filter_size = (3, 3), pool2_ds = (2, 2), dropout2_p = 0.2,
-        conv3_num_filters = 32, conv3_filter_size = (3, 3), pool3_ds = (2, 2), dropout3_p = 0.3,
-        hidden4_num_units = 1000, dropout4_p = 0.5,
-        hidden5_num_units = 1000,
-        output_num_units = 30, output_nonlinearity = None,
+                ('hidden4', layers.DenseLayer),
+                ('dropout4', layers.DropoutLayer),
 
-        update_learning_rate = theano.shared(float32(0.03)),
-        update_momentum = theano.shared(float32(0.9)),
+                ('hidden5', layers.DenseLayer),
+                ('output', layers.DenseLayer),
+                ],
+            input_shape = (None, 1, 96, 96),
+            conv1_num_filters = 32, conv1_filter_size = (3, 3), pool1_ds = (2, 2), dropout1_p = 0.1,
+            conv2_num_filters = 32, conv2_filter_size = (3, 3), pool2_ds = (2, 2), dropout2_p = 0.2,
+            conv3_num_filters = 32, conv3_filter_size = (3, 3), pool3_ds = (2, 2), dropout3_p = 0.3,
+            hidden4_num_units = 1000, dropout4_p = 0.5,
+            hidden5_num_units = 1000,
+            output_num_units = 30, output_nonlinearity = None,
 
-        regression = True,
-        batch_iterator_train = FlipBatchIterator(batch_size = 128),
+            update_learning_rate = theano.shared(float32(0.03)),
+            update_momentum = theano.shared(float32(0.9)),
 
-        on_epoch_finished = [
-            AdjustVariable('update_learning_rate', start = 0.03, stop = 0.0001),
-            AdjustVariable('update_momentum', start = 0.9, stop = 0.999),
-            ],
-        max_epochs = 10000,
-        verbose = 1,
-        )
+            regression = True,
+            batch_iterator_train = FlipBatchIterator(batch_size = 128),
 
-X, y = load2d()
-net5.fit(X, y)
+            on_epoch_finished = [
+                AdjustVariable('update_learning_rate', start = 0.03, stop = 0.0001),
+                AdjustVariable('update_momentum', start = 0.9, stop = 0.999),
+                ],
+            max_epochs = 10000,
+            verbose = 1,
+            )
+    return net
 
-with open('net5.pickle', 'wb') as f:
-    pickle.dump(net5, f, -1)
 
-print mean_squared_error(net5.predict(X), y)
+def main():
+    X, y = load_2d()
+    cnn = get_net()
+    cnn.fit(X, y)
+    ws = [w.get_value for w in nn.get_all_params()]
+    np.save('cnn.npy', ws)
+
+
 
