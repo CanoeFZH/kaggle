@@ -189,7 +189,7 @@ def fit_specialists():
     i = 0
     for setting in get_specialists():
         cols = setting['columns']
-        X, y = load_d(cols = cols)
+        X, y = load_2d(cols = cols)
 
         model = create_net()
 
@@ -198,7 +198,7 @@ def fit_specialists():
 
         model.max_epoches = int(2e7 / y.shape[0])
         
-        print "Training model for columns {} for {} epochs".fomrat(
+        print "Training model for columns {} for {} epochs".format(
                 cols, model.max_epochs)
 
         model.fit(X, y)
@@ -208,12 +208,8 @@ def fit_specialists():
         i += 1
 
 
-def main():
-    X, y = load_2d()
-    cnn = create_net()
-    cnn.fit(X, y)
-    ws = [w.get_value for w in nn.get_all_params()]
-    np.save('cnn.npy', ws)
+if __name__ == '__main__':
+    fit_specialists()
 
 
 
