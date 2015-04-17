@@ -197,7 +197,6 @@ def fit_specialists():
         model.batch_iterator_train.flip_indices = setting['flip_indices']
 
         model.max_epochs = int(2e7 / y.shape[0])
-        model.max_epochs = 1
         
         print "Training model for columns {} for {} epochs".format(
                 cols, model.max_epochs)
