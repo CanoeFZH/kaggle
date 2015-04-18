@@ -97,7 +97,7 @@ class EarlyStopping(object):
         if current_valid < self.best_valid:
             self.best_valid = current_valid
             self.best_valid_epoch = current_epoch
-            self.best_weighs = [w.get_value() for w in nn.get_all_params()]
+            self.best_weights = [w.get_value() for w in nn.get_all_params()]
         elif self.best_valid_epoch + self.patience < current_epoch:
             print "Early Stoppoing"
             print "Best valid loss vas {:.6f} at epoch {}.".format(
