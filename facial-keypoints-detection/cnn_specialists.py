@@ -119,6 +119,9 @@ def get_specialists():
                             'mouth_center_corner_x', 'mouth_center_corner_y'),
                 flip_indices = ((0, 2), (1, 3))),
 
+            dict(columns=('mouth_center_bottom_lip_x', 'mouth_center_bottom_lip_y'),
+                flip_indices = ()),
+
             dict(columns = ('left_eye_inner_corner_x', 'left_eye_inner_corner_y',
                             'right_eye_inner_corner_x', 'right_eye_inner_corner_y',
                             'left_eye_outer_corner_x', 'left_eye_outer_corner_y',
@@ -185,7 +188,6 @@ from collections import OrderedDict
 
 def fit_specialists():
     specialists = OrderedDict()
-    
     i = 0
     for setting in get_specialists():
         cols = setting['columns']
@@ -195,15 +197,13 @@ def fit_specialists():
 
         model.output_num_units = y.shape[1]
         model.batch_iterator_train.flip_indices = setting['flip_indices']
-
         model.max_epochs = int(2e7 / y.shape[0])
         
         print "Training model for columns {} for {} epochs".format(
                 cols, model.max_epochs)
 
         model.fit(X, y)
-
-        model.save_weights_to(str(i) + '.npy')
+        model.save_weights_to('s' + str(i) + '.npy') # to use yan's code
         i += 1
 
 
