@@ -1,4 +1,4 @@
-
+import os
 import numpy as np
 from pandas.io.parsers import read_csv 
 from lasagne import layers
