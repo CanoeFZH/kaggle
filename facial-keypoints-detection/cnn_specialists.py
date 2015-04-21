@@ -137,7 +137,7 @@ def get_specialists():
 
     return SPECIALIST_SETTINGS
 
-def create_net():
+def create_cnn_net():
     net = NeuralNet(
             layers = [
                 ('input', layers.InputLayer),
@@ -193,7 +193,7 @@ def fit_specialists():
         cols = setting['columns']
         X, y = load_2d(cols = cols)
 
-        model = create_net()
+        model = create_cnn_net()
 
         model.output_num_units = y.shape[1]
         model.batch_iterator_train.flip_indices = setting['flip_indices']
