@@ -207,8 +207,49 @@ def fit_specialists():
         i += 1
 
 
+def predict_specialists():
+
+    non_specialists_cnn = create_cnn_net()
+    non_specialists_cnn.load_weights_from('net.weight.pkl')
+    Y_ALL = non_specialists_cnn.predict(X) # model without specialists
+    Y_ALL = (Y_ALL + 1) * 48.0
+
+    sp = {}
+    i = 0
+    for setting in get_specialists():
+        cols = setting['columns']
+        X, _ = load_2d(test = True, cols = cols)
+
+        model = create_cnn_net()
+        model.output_num_units = len(setting['columns'])
+        model.load_weights_from('s' + str(i) + '.npy')
+
+        pY = nn.predict(X)
+        pY = (pY + 1) * 48.0
+
+        sp[name] = pY
+        i += 1
+    
+    INDEX_NAMES = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
+    #ensemble
+    Y = Y_ALL.copy()
+    for name, idx in enumerate(INDEX_NAMES):
+        i = 0
+        for setting in get_specialists():
+            cols = setting['columns']
+            if not name in cols: continue
+            setting_idx = cols.index(name)
+            sp_name = 's' + str(i) + '.npy'
+            tmp_Y = sp[sp_name][:, setting_idx]
+            i += 1
+        
+        Y[:, idx] = (Y + tmp_Y) * 0.5
+
+    return Y
+
 if __name__ == '__main__':
     fit_specialists()
+    predict_specialists()
 
 
 
