@@ -225,7 +225,7 @@ def predict_specialists():
         model.output_num_units = len(setting['columns'])
         model.load_weights_from('s' + str(i) + '.npy')
 
-        pY = nn.predict(X)
+        pY = model.predict(X)
         pY = (pY + 1) * 48.0
 
         sp[name] = pY
