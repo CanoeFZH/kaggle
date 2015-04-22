@@ -252,6 +252,7 @@ def ensemble(Y_ALL, sp):
             if name in cols:
                 setting_idx = cols.index(name)
                 sp_name = 's' + str(i) + '.npy'
+                print sp_name, sp[sp_name].shape, setting_idx
                 tmp_Y = sp[sp_name][:, setting_idx]
                 break
             i += 1
