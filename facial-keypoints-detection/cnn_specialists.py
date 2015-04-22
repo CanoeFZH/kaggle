@@ -223,12 +223,13 @@ def predict_specialists():
 
         model = create_cnn_net()
         model.output_num_units = len(setting['columns'])
-        model.load_weights_from('s' + str(i) + '.npy')
+        sp_name = 's' + str(i) + '.npy'
+        model.load_weights_from(sp_name)
 
         pY = model.predict(X)
         pY = (pY + 1) * 48.0
 
-        sp[name] = pY
+        sp[sp_name] = pY
         i += 1
     
     INDEX_NAMES = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
@@ -244,7 +245,7 @@ def predict_specialists():
             tmp_Y = sp[sp_name][:, setting_idx]
             i += 1
         
-        Y[:, idx] = (Y + tmp_Y) * 0.5
+        Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
 
     return Y
 
