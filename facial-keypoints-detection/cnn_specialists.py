@@ -238,6 +238,7 @@ def predict_specialists():
     idx = 0
     for name in INDEX_NAMES:
         i = 0
+        tmp_Y = None
         for setting in get_specialists():
             cols = setting['columns']
             if not name in cols: continue
