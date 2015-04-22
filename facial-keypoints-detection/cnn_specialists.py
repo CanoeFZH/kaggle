@@ -242,11 +242,10 @@ def ensemble(Y_ALL, sp):
         names[prefix + '_x'] = idx
         names[prefix + '_y'] = idx + 1
         idx += 2
-    
-    print get_specialists()
 
     Y = Y_ALL.copy()
     for name in names:
+        print name
         i = 0
         tmp_Y = None
         idx = names[name]
