@@ -232,24 +232,25 @@ def predict_specialists():
         sp[sp_name] = pY
         i += 1
     
-    INDEX_NAMES = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
+    NAME_PREFIX = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
     #ensemble
+    names = []
+    for prefix in NAME_PREFIX:
+        names.append(prefix + '_x')
+        names.append(prefix + '_y')
+
     Y = Y_ALL.copy()
     idx = 0
-    for name in INDEX_NAMES:
-        print name
+    for name in names:
         i = 0
         tmp_Y = None
         for setting in get_specialists():
             cols = setting['columns']
-            print name in cols
             if not name in cols: continue
             setting_idx = cols.index(name)
-            print setting_idx
             sp_name = 's' + str(i) + '.npy'
             tmp_Y = sp[sp_name][:, setting_idx]
             i += 1
-            print tmp_Y
         Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
         idx += 1
 
