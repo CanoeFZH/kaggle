@@ -208,7 +208,8 @@ def fit_specialists():
 
 
 def predict_specialists():
-
+    
+    X, _ = load_2d(test = True)
     non_specialists_cnn = create_cnn_net()
     non_specialists_cnn.load_weights_from('net.weight.pkl')
     Y_ALL = non_specialists_cnn.predict(X) # model without specialists
