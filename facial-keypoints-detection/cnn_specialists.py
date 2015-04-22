@@ -237,10 +237,12 @@ def predict_specialists():
     Y = Y_ALL.copy()
     idx = 0
     for name in INDEX_NAMES:
+        print name
         i = 0
         tmp_Y = None
         for setting in get_specialists():
             cols = setting['columns']
+            print name in cols
             if not name in cols: continue
             setting_idx = cols.index(name)
             print setting_idx
