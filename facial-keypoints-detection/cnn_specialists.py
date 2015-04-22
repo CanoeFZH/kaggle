@@ -241,10 +241,9 @@ def predict_specialists():
         tmp_Y = None
         for setting in get_specialists():
             cols = setting['columns']
-            print cols
             if not name in cols: continue
-
             setting_idx = cols.index(name)
+            print setting_idx
             sp_name = 's' + str(i) + '.npy'
             tmp_Y = sp[sp_name][:, setting_idx]
             i += 1
