@@ -235,11 +235,36 @@ def predict_specialists():
     
 def ensemble(Y_ALL, sp):
     NAME_PREFIX = 'left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip'.split(', ')
-    #ensemble
     names = []
     for name in NAME_PREFIX:
         names.append(name + '_x')
         names.append(name + '_y')
+
+    Y = Y_ALL.copy()
+    idx = 0
+    for name in names:
+        print name
+        i = 0
+        tmp_Y = None
+        for setting in get_specialists():
+            cols = setting['columns']
+            print cols
+            if name in cols:
+                setting_idx = cols.index(name)
+                sp_name = 's' + str(i) + '.npy'
+                tmp_Y = sp[sp_name][:, setting_idx]
+                break
+            i += 1
+        #Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5 #ensemble
+        Y[:, idx] = tmp_Y
+        idx += 1
+
+    return Y
+
+if __name__ == '__main__':
+    fit_specialists()
+    predict_specialists()
+
 
     '''names = [
             'left_eye_center_x', 'left_eye_center_y', 
@@ -258,31 +283,3 @@ def ensemble(Y_ALL, sp):
             'left_eyebrow_outer_end_x', 'left_eyebrow_outer_end_y',
             'right_eyebrow_outer_end_x', 'right_eyebrow_outer_end_y',
       ]  '''
-
-    Y = Y_ALL.copy()
-    idx = 0
-    for name in names:
-        print name
-        i = 0
-        tmp_Y = None
-        for setting in get_specialists():
-            print setting
-            cols = setting['columns']
-            if name in cols:
-                setting_idx = cols.index(name)
-                sp_name = 's' + str(i) + '.npy'
-                tmp_Y = sp[sp_name][:, setting_idx]
-                break
-            i += 1
-        #Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
-        Y[:, idx] = tmp_Y
-        idx += 1
-
-    return Y
-
-if __name__ == '__main__':
-    fit_specialists()
-    predict_specialists()
-
-
-
