@@ -235,8 +235,8 @@ def predict_specialists():
     INDEX_NAMES = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
     #ensemble
     Y = Y_ALL.copy()
-    for name, idx in enumerate(INDEX_NAMES):
-        print idx
+    idx = 0
+    for name in INDEX_NAMES:
         i = 0
         for setting in get_specialists():
             cols = setting['columns']
@@ -247,6 +247,7 @@ def predict_specialists():
             i += 1
         
         Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
+        idx += 1
 
     return Y
 
