@@ -234,21 +234,32 @@ def predict_specialists():
     return Y_ALL, sp
     
 def ensemble(Y_ALL, sp):
-    NAME_PREFIX = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
+    #NAME_PREFIX = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
     #ensemble
-    names = {}
-    idx = 0
-    for prefix in NAME_PREFIX:
-        names[prefix + '_x'] = idx
-        names[prefix + '_y'] = idx + 1
-        idx += 2
+    names = [
+            'left_eye_center_x', 'left_eye_center_y', 
+            'right_eye_center_x', 'right_eye_center_y',
+            'nose_tip_x', 'nose_tip_y',
+            'mouth_left_corner_x', 'mouth_left_corner_y',
+            'mouth_right_corner_x', 'mouth_right_corner_y',
+            'mouth_center_top_lip_x', 'mouth_center_top_lip_y',
+            'mouth_center_bottom_lip_x', 'mouth_center_bottom_lip_y',
+            'left_eye_inner_corner_x', 'left_eye_inner_corner_y',
+            'right_eye_inner_corner_x', 'right_eye_inner_corner_y',
+            'left_eye_outer_corner_x', 'left_eye_outer_corner_y',
+            'right_eye_outer_corner_x', 'right_eye_outer_corner_y',
+            'left_eyebrow_inner_end_x', 'left_eyebrow_inner_end_y',
+            'right_eyebrow_inner_end_x', 'right_eyebrow_inner_end_y',
+            'left_eyebrow_outer_end_x', 'left_eyebrow_outer_end_y',
+            'right_eyebrow_outer_end_x', 'right_eyebrow_outer_end_y',
+            ]
 
     Y = Y_ALL.copy()
+    idx = 0
     for name in names:
         print name
         i = 0
         tmp_Y = None
-        idx = names[name]
         for setting in get_specialists():
             print setting
             cols = setting['columns']
@@ -258,7 +269,9 @@ def ensemble(Y_ALL, sp):
             sp_name = 's' + str(i) + '.npy'
             tmp_Y = sp[sp_name][:, setting_idx]
             i += 1
-        Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
+        #Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
+        Y[:, idx] = tmp_Y
+        idx += 1
 
     return Y
 
