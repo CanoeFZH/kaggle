@@ -232,19 +232,25 @@ def predict_specialists():
         sp[sp_name] = pY
         i += 1
     
+def ensemble():
     NAME_PREFIX = "left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip".split(', ')
     #ensemble
-    names = []
+    names = {}
+    idx = 0
     for prefix in NAME_PREFIX:
-        names.append(prefix + '_x')
-        names.append(prefix + '_y')
+        names[prefix + '_x'] = idx
+        names[prefix + '_y'] = idx + 1
+        idx += 2
+    
+    print get_specialists()
 
     Y = Y_ALL.copy()
-    idx = 0
     for name in names:
         i = 0
         tmp_Y = None
+        idx = names[name]
         for setting in get_specialists():
+            print setting
             cols = setting['columns']
             if not name in cols: continue
             setting_idx = cols.index(name)
@@ -253,7 +259,6 @@ def predict_specialists():
             tmp_Y = sp[sp_name][:, setting_idx]
             i += 1
         Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5
-        idx += 1
 
     return Y
 
