@@ -236,6 +236,7 @@ def predict_specialists():
     #ensemble
     Y = Y_ALL.copy()
     for name, idx in enumerate(INDEX_NAMES):
+        print idx
         i = 0
         for setting in get_specialists():
             cols = setting['columns']
