@@ -44,7 +44,7 @@ def load(test = False, cols = None):
     return X, y
 
 def load_2d(test = False, cols = None):
-    X, y = load(test)
+    X, y = load(test = test, cols = cols)
     X = X.reshape(-1, 1, 96, 96)
     return X, y
 
