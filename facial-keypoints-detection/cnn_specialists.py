@@ -188,7 +188,7 @@ def fit_specialists():
     for setting in SPECIALIST_SETTINGS:
         cols = setting['columns']
         X, y = load_2d(cols = cols)
-        model = clonne(net)
+        model = clone(net)
         model.output_num_units = y.shape[1]
         model.batch_iterator_train.flip_indices = setting['flip_indices']
         model.max_epochs = int(2e7 / y.shape[0])
