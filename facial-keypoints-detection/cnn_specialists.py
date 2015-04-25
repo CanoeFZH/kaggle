@@ -106,94 +106,89 @@ class EarlyStopping(object):
             nn.load_weights_from(self.best_weights)
             raise StopIteration()
 
-def get_specialists():
-    SPECIALIST_SETTINGS = [
-            dict(columns = ('left_eye_center_x', 'left_eye_center_y', 
-                            'right_eye_center_x', 'right_eye_center_y'),
-                flip_indices = ((0, 2), (1, 3))),
+SPECIALIST_SETTINGS = [
+        dict(columns = ('left_eye_center_x', 'left_eye_center_y', 
+            'right_eye_center_x', 'right_eye_center_y'),
+            flip_indices = ((0, 2), (1, 3))),
 
-            dict(columns = ('nose_tip_x', 'nose_tip_y'),
-                flip_indices = ()),
+        dict(columns = ('nose_tip_x', 'nose_tip_y'),
+            flip_indices = ()),
 
-            dict(columns = ('mouth_left_corner_x', 'mouth_left_corner_y',
-                            'mouth_right_corner_x', 'mouth_right_corner_y',
-                            'mouth_center_top_lip_x', 'mouth_center_top_lip_y'),
-                flip_indices = ((0, 2), (1, 3))),
+        dict(columns = ('mouth_left_corner_x', 'mouth_left_corner_y',
+            'mouth_right_corner_x', 'mouth_right_corner_y',
+            'mouth_center_top_lip_x', 'mouth_center_top_lip_y'),
+            flip_indices = ((0, 2), (1, 3))),
 
-            dict(columns=('mouth_center_bottom_lip_x', 'mouth_center_bottom_lip_y'),
-                flip_indices = ()),
+        dict(columns=('mouth_center_bottom_lip_x', 'mouth_center_bottom_lip_y'),
+            flip_indices = ()),
 
-            dict(columns = ('left_eye_inner_corner_x', 'left_eye_inner_corner_y',
-                            'right_eye_inner_corner_x', 'right_eye_inner_corner_y',
-                            'left_eye_outer_corner_x', 'left_eye_outer_corner_y',
-                            'right_eye_outer_corner_x', 'right_eye_outer_corner_y'),
-                flip_indices = ((0, 2), (1, 3), (4, 6), (5, 7))),
+        dict(columns = ('left_eye_inner_corner_x', 'left_eye_inner_corner_y',
+            'right_eye_inner_corner_x', 'right_eye_inner_corner_y',
+            'left_eye_outer_corner_x', 'left_eye_outer_corner_y',
+            'right_eye_outer_corner_x', 'right_eye_outer_corner_y'),
+            flip_indices = ((0, 2), (1, 3), (4, 6), (5, 7))),
 
-            dict(columns = ('left_eyebrow_inner_end_x', 'left_eyebrow_inner_end_y',
-                            'right_eyebrow_inner_end_x', 'right_eyebrow_inner_end_y',
-                            'left_eyebrow_outer_end_x', 'left_eyebrow_outer_end_y',
-                            'right_eyebrow_outer_end_x', 'right_eyebrow_outer_end_y'),
-                flip_indices = ((0, 2), (1, 3), (4, 6), (5, 7))),
-            ]
+        dict(columns = ('left_eyebrow_inner_end_x', 'left_eyebrow_inner_end_y',
+            'right_eyebrow_inner_end_x', 'right_eyebrow_inner_end_y',
+            'left_eyebrow_outer_end_x', 'left_eyebrow_outer_end_y',
+            'right_eyebrow_outer_end_x', 'right_eyebrow_outer_end_y'),
+            flip_indices = ((0, 2), (1, 3), (4, 6), (5, 7))),
+        ]
 
-    return SPECIALIST_SETTINGS
+net = NeuralNet(
+        layers = [
+            ('input', layers.InputLayer),
 
-def create_cnn_net():
-    net = NeuralNet(
-            layers = [
-                ('input', layers.InputLayer),
+            ('conv1', layers.Conv2DLayer),
+            ('pool1', layers.MaxPool2DLayer),
+            ('dropout1', layers.DropoutLayer),
 
-                ('conv1', layers.Conv2DLayer),
-                ('pool1', layers.MaxPool2DLayer),
-                ('dropout1', layers.DropoutLayer),
+            ('conv2', layers.Conv2DLayer),
+            ('pool2', layers.MaxPool2DLayer), 
+            ('dropout2', layers.DropoutLayer),
 
-                ('conv2', layers.Conv2DLayer),
-                ('pool2', layers.MaxPool2DLayer), 
-                ('dropout2', layers.DropoutLayer),
+            ('conv3', layers.Conv2DLayer),
+            ('pool3', layers.MaxPool2DLayer), 
+            ('dropout3', layers.DropoutLayer),
 
-                ('conv3', layers.Conv2DLayer),
-                ('pool3', layers.MaxPool2DLayer), 
-                ('dropout3', layers.DropoutLayer),
+            ('hidden4', layers.DenseLayer),
+            ('dropout4', layers.DropoutLayer),
 
-                ('hidden4', layers.DenseLayer),
-                ('dropout4', layers.DropoutLayer),
+            ('hidden5', layers.DenseLayer),
+            ('output', layers.DenseLayer),
+            ],
+        input_shape = (None, 1, 96, 96),
+        conv1_num_filters = 32, conv1_filter_size = (3, 3), pool1_ds = (2, 2), dropout1_p = 0.1,
+        conv2_num_filters = 32, conv2_filter_size = (3, 3), pool2_ds = (2, 2), dropout2_p = 0.2,
+        conv3_num_filters = 32, conv3_filter_size = (3, 3), pool3_ds = (2, 2), dropout3_p = 0.3,
+        hidden4_num_units = 1000, dropout4_p = 0.5,
+        hidden5_num_units = 1000,
+        output_num_units = 30, output_nonlinearity = None,
 
-                ('hidden5', layers.DenseLayer),
-                ('output', layers.DenseLayer),
-                ],
-            input_shape = (None, 1, 96, 96),
-            conv1_num_filters = 32, conv1_filter_size = (3, 3), pool1_ds = (2, 2), dropout1_p = 0.1,
-            conv2_num_filters = 32, conv2_filter_size = (3, 3), pool2_ds = (2, 2), dropout2_p = 0.2,
-            conv3_num_filters = 32, conv3_filter_size = (3, 3), pool3_ds = (2, 2), dropout3_p = 0.3,
-            hidden4_num_units = 1000, dropout4_p = 0.5,
-            hidden5_num_units = 1000,
-            output_num_units = 30, output_nonlinearity = None,
+        update_learning_rate = theano.shared(float32(0.03)),
+        update_momentum = theano.shared(float32(0.9)),
 
-            update_learning_rate = theano.shared(float32(0.03)),
-            update_momentum = theano.shared(float32(0.9)),
+        regression = True,
+        batch_iterator_train = FlipBatchIterator(batch_size = 128),
 
-            regression = True,
-            batch_iterator_train = FlipBatchIterator(batch_size = 128),
-
-            on_epoch_finished = [
-                AdjustVariable('update_learning_rate', start = 0.03, stop = 0.0001),
-                AdjustVariable('update_momentum', start = 0.9, stop = 0.999),
-                EarlyStopping(patience = 200),
-                ],
-            max_epochs = 10000,
-            verbose = 1,
-            )
-    return net
+        on_epoch_finished = [
+            AdjustVariable('update_learning_rate', start = 0.03, stop = 0.0001),
+            AdjustVariable('update_momentum', start = 0.9, stop = 0.999),
+            EarlyStopping(patience = 200),
+            ],
+        max_epochs = 10000,
+        verbose = 1,
+        )
 
 from collections import OrderedDict
 
 def fit_specialists():
     specialists = OrderedDict()
 
-    for setting in get_specialists():
+    for setting in SPECIALIST_SETTINGS:
         cols = setting['columns']
         X, y = load_2d(cols = cols)
-        model = create_cnn_net()
+        model = clonne(net)
         model.output_num_units = y.shape[1]
         model.batch_iterator_train.flip_indices = setting['flip_indices']
         model.max_epochs = int(2e7 / y.shape[0])
@@ -214,18 +209,15 @@ def predict_specialists(frame_specialists = 'net-specialists.pickle'):
 
     X = load_2d(test = True)[0]
     y_pred = np.empty((X.shape[0], 0))
-
     for model in specialists.values():
         y_pred1 = model.predict(X)
+        print 'y pred {}'.format(y_pred1.shape)
         y_pred = np.hstack([y_pred, y_pred1])
-
+    y_pred2 = (y_pred + 1) * 48.0
+    y_pred2 = y_pred2.clip(0, 96)
     columns = ()
     for cols in specialists.keys():
         columns += cols
-
-    y_pred2 = (y_pred + 1) * 48.0
-    y_pred2 = y_pred2.clip(0, 96)
-
     df = DataFrame(y_pred2, columns = columns)
     
     lookup_table = read_csv(os.path.expanduser('IdLookupTable.csv'))
@@ -234,9 +226,8 @@ def predict_specialists(frame_specialists = 'net-specialists.pickle'):
     for index, row in lookup_table.iterrows():
         values.append((row['RowId'], df.ix[row.ImageId - 1][row.FeatureName]))
     now_str = datetime.now().isoformat().replace(':', '-')
-    submmision = DataFrame(values, columns = ('RowId', 'Location'))
-
     filename = 'submission-{}.csv'.format(now_str)
+    submmision = DataFrame(values, columns = ('RowId', 'Location'))
     submission.to_csv(filename, index = False)
     print 'write {}'.format(filename)
 
