@@ -8,6 +8,7 @@ from nolearn.lasagne import BatchIterator
 from sklearn.utils import shuffle
 from sklearn.metrics import mean_squared_error
 import theano
+from pandas import DataFrame
 import cPickle as pickle
 import sys
 
@@ -226,11 +227,12 @@ def predict_specialists(frame_specialists = 'net-specialists.pickle'):
     pY = pY.clip(0, 96)
 
     df = DataFrame(pY, columns = columns)
-    lookup_table = read_csv(os.path.expanduser(LOOKUP))
+    
+    lookup_table = read_csv(os.path.expanduser('IdLookupTable.csv'))
 
     values = []
     for index, row in lookup_table.iterrows():
-        values.append((row['RowId'], df.ix[row.ImageId - 1][row.FeatureNamel],))
+        values.append((row['RowId'], df.ix[row.ImageId - 1][row.FeatureName]))
     now_str = datetime.now().isoformat().replace(':', '-')
     submmision = DataFrame(values, columns = ('RowId', 'Location'))
 
