@@ -195,7 +195,6 @@ def fit_specialists():
         model.output_num_units = y.shape[1]
         model.batch_iterator_train.flip_indices = setting['flip_indices']
         model.max_epochs = int(2e7 / y.shape[0])
-        model.max_epochs = 1
         
         print 'Training model for columns {} for {} epochs'.format(
                 cols, model.max_epochs)
@@ -230,7 +229,7 @@ def predict_specialists(frame_specialists = 'net-specialists.pickle'):
         values.append((row['RowId'], df.ix[row.ImageId - 1][row.FeatureName]))
     now_str = datetime.now().isoformat().replace(':', '-')
     filename = 'submission-{}.csv'.format(now_str)
-    submmision = DataFrame(values, columns = ('RowId', 'Location'))
+    submission = DataFrame(values, columns = ('RowId', 'Location'))
     submission.to_csv(filename, index = False)
     print 'write {}'.format(filename)
 
