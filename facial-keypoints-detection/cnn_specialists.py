@@ -188,79 +188,55 @@ from collections import OrderedDict
 
 def fit_specialists():
     specialists = OrderedDict()
-    i = 0
+
     for setting in get_specialists():
         cols = setting['columns']
         X, y = load_2d(cols = cols)
-
         model = create_cnn_net()
-
         model.output_num_units = y.shape[1]
         model.batch_iterator_train.flip_indices = setting['flip_indices']
         model.max_epochs = int(2e7 / y.shape[0])
+        model.max_epochs = 1
         
-        print "Training model for columns {} for {} epochs".format(
+        print 'Training model for columns {} for {} epochs'.format(
                 cols, model.max_epochs)
 
         model.fit(X, y)
-        model.save_weights_to('s' + str(i) + '.npy') # to use yan's code
-        i += 1
-
-
-def predict_specialists():
+        specialists[cols] = model
     
-    X, _ = load_2d(test = True)
-    non_specialists_cnn = create_cnn_net()
-    non_specialists_cnn.load_weights_from('net.weight.pkl')
-    Y_ALL = non_specialists_cnn.predict(X) # model without specialists
-    Y_ALL = (Y_ALL + 1) * 48.0
+    with open('net-specialists.pickle', 'wb') as f:
+        pickle.dump(specialists, f, -1)
 
-    sp = {}
-    i = 0
-    for setting in get_specialists():
-        cols = setting['columns']
-        X, _ = load_2d(test = True, cols = cols)
+def predict_specialists(frame_specialists = 'net-specialists.pickle'):
+    with open(frame_specialists, 'rb') as f:
+        specialists = pickle.load(f)
 
-        model = create_cnn_net()
-        model.output_num_units = len(setting['columns'])
-        sp_name = 's' + str(i) + '.npy'
-        model.load_weights_from(sp_name)
+    X = load_2d(test = True)[0]
+    pY = np.empty((X.shape[0], 0))
 
-        pY = model.predict(X)
-        pY = (pY + 1) * 48.0
+    for model in specialists.values():
+        y_pred = model.predict(X)
+        pY = np.hstack([pY, y_pred])
 
-        sp[sp_name] = pY
-        i += 1
-    return Y_ALL, sp
-    
-def ensemble(Y_ALL, sp):
-    NAME_PREFIX = 'left_eye_center, right_eye_center, left_eye_inner_corner, left_eye_outer_corner, right_eye_inner_corner, right_eye_outer_corner, left_eyebrow_inner_end, left_eyebrow_outer_end, right_eyebrow_inner_end, right_eyebrow_outer_end, nose_tip, mouth_left_corner, mouth_right_corner, mouth_center_top_lip, mouth_center_bottom_lip'.split(', ')
-    names = []
-    for name in NAME_PREFIX:
-        names.append(name + '_x')
-        names.append(name + '_y')
+    columns = ()
+    for cols in specialists.keys():
+        columns += cols
 
-    Y = Y_ALL.copy()
-    idx = 0
-    for name in names:
-        print name
-        i = 0
-        tmp_Y = None
-        for setting in get_specialists():
-            cols = setting['columns']
-            print cols
-            if name in cols:
-                setting_idx = cols.index(name)
-                sp_name = 's' + str(i) + '.npy'
-                print sp_name, sp[sp_name].shape, setting_idx
-                tmp_Y = sp[sp_name][:, setting_idx]
-                break
-            i += 1
-        #Y[:, idx] = (Y[:, idx] + tmp_Y) * 0.5 #ensemble
-        Y[:, idx] = tmp_Y
-        idx += 1
+    pY = (pY + 1) * 48.0
+    pY = pY.clip(0, 96)
 
-    return Y
+    df = DataFrame(pY, columns = columns)
+    lookup_table = read_csv(os.path.expanduser(LOOKUP))
+
+    values = []
+    for index, row in lookup_table.iterrows():
+        values.append((row['RowId'], df.ix[row.ImageId - 1][row.FeatureNamel],))
+    now_str = datetime.now().isoformat().replace(':', '-')
+    submmision = DataFrame(values, columns = ('RowId', 'Location'))
+
+    filename = 'submission-{}.csv'.format(now_str)
+    submission.to_csv(filename, index = False)
+    print 'write {}'.format(filename)
 
 if __name__ == '__main__':
     fit_specialists()
