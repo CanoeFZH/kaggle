@@ -6,6 +6,7 @@ from lasagne.updates import nesterov_momentum
 from nolearn.lasagne import NeuralNet
 from nolearn.lasagne import BatchIterator
 from sklearn.utils import shuffle
+from sklearn.base import clone
 from sklearn.metrics import mean_squared_error
 import theano
 from pandas import DataFrame
