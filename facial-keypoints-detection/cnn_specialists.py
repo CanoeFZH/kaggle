@@ -213,20 +213,20 @@ def predict_specialists(frame_specialists = 'net-specialists.pickle'):
         specialists = pickle.load(f)
 
     X = load_2d(test = True)[0]
-    pY = np.empty((X.shape[0], 0))
+    y_pred = np.empty((X.shape[0], 0))
 
     for model in specialists.values():
-        y_pred = model.predict(X)
-        pY = np.hstack([pY, y_pred])
+        y_pred1 = model.predict(X)
+        y_pred = np.hstack([y_pred, y_pred1])
 
     columns = ()
     for cols in specialists.keys():
         columns += cols
 
-    pY = (pY + 1) * 48.0
-    pY = pY.clip(0, 96)
+    y_pred2 = (y_pred + 1) * 48.0
+    y_pred2 = y_pred2.clip(0, 96)
 
-    df = DataFrame(pY, columns = columns)
+    df = DataFrame(y_pred2, columns = columns)
     
     lookup_table = read_csv(os.path.expanduser('IdLookupTable.csv'))
 
