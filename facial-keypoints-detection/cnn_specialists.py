@@ -1,6 +1,8 @@
 import os
+from collections import OrderedDict
 import numpy as np
 from pandas.io.parsers import read_csv 
+from datetime import datetime
 from lasagne import layers
 from lasagne.updates import nesterov_momentum
 from nolearn.lasagne import NeuralNet
@@ -14,6 +16,7 @@ import cPickle as pickle
 import sys
 
 sys.setrecursionlimit(10000)
+np.random.seed(42)
 
 FTRAIN = 'training.csv'
 FTEST = 'test.csv'
@@ -181,7 +184,6 @@ net = NeuralNet(
         verbose = 1,
         )
 
-from collections import OrderedDict
 
 def fit_specialists():
     specialists = OrderedDict()
